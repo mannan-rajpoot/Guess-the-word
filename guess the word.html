@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WordGuess | Multiplayer Game</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --accent: #f72585;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --success: #4cc9f0;
+      --danger: #ef233c;
+      --warning: #f8961e;
+      --gray: #adb5bd;
+      --dark-gray: #495057;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Auth Pages */
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow);
+      transform: translateY(0);
+      transition: var(--transition);
+    }
+
+    .auth-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .auth-header h1 {
+      color: var(--primary);
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .auth-header p {
+      color: var(--gray);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark-gray);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    .btn {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .btn:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+
+    .btn-accent {
+      background: var(--accent);
+    }
+
+    .btn-accent:hover {
+      background: #d91a6b;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .mt-3 {
+      margin-top: 16px;
+    }
+
+    /* Home Page */
+    .home-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 80px);
+      padding: 20px;
+    }
+
+    .home-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .home-header h1 {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 16px;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .home-header p {
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    /* Room Creation Page */
+    .room-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .room-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .room-id {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--light);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .room-id span {
+      font-family: monospace;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .copy-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .copy-btn:hover {
+      background: var(--secondary);
+    }
+
+    /* Game Page */
+    .game-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .game-id {
+      background: var(--light);
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    .game-status {
+      padding: 15px;
+      background: var(--light);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .game-status.winner {
+      background: rgba(76, 201, 240, 0.2);
+      color: var(--success);
+    }
+
+    .guess-form {
+      margin-bottom: 20px;
+    }
+
+    .guesses-container {
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .guess-item {
+      padding: 12px;
+      margin-bottom: 10px;
+      background: var(--light);
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .guess-item.correct {
+      background: rgba(76, 201, 240, 0.1);
+      border-left: 4px solid var(--success);
+    }
+
+    .guess-item.incorrect {
+      border-left: 4px solid var(--danger);
+    }
+
+    .guess-user {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .guess-value {
+      font-weight: 500;
+    }
+
+    .guess-result {
+      font-weight: bold;
+    }
+
+    /* Navigation */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: white;
+      box-shadow: var(--shadow);
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo i {
+      margin-right: 10px;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--dark);
+      cursor: pointer;
+      display: none;
+    }
+
+    /* Sidebar Menu */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: white;
+      box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+      z-index: 1000;
+      transition: right 0.3s ease;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.active {
+      right: 0;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .close-menu {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-right: 15px;
+    }
+
+    .user-info h3 {
+      margin-bottom: 5px;
+    }
+
+    .user-info p {
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    .sidebar-nav {
+      list-style: none;
+      flex-grow: 1;
+    }
+
+    .sidebar-nav li {
+      margin-bottom: 15px;
+    }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      color: var(--dark);
+      text-decoration: none;
+      padding: 10px;
+      border-radius: 8px;
+      transition: var(--transition);
+    }
+
+    .sidebar-nav a:hover {
+      background: var(--light);
+      color: var(--primary);
+    }
+
+    .sidebar-nav i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    /* Search Form */
+    .search-form {
+      margin: 20px 0;
+    }
+
+    .search-results {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .search-result {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: var(--light);
+      border-radius: 8px;
+    }
+
+    /* Profile Edit */
+    .profile-form {
+      margin-top: 20px;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    /* Notifications */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      background: var(--primary);
+      color: white;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.error {
+      background: var(--danger);
+    }
+
+    .notification.success {
+      background: var(--success);
+    }
+
+    .notification.warning {
+      background: var(--warning);
+    }
+
+    .notification i {
+      margin-right: 10px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .home-header h1 {
+        font-size: 2.2rem;
+      }
+
+      .auth-card {
+        padding: 30px 20px;
+      }
+
+      .room-card {
+        padding: 20px;
+      }
+
+      .game-container {
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 10px;
+      }
+
+      .home-header h1 {
+        font-size: 1.8rem;
+      }
+
+      .home-header p {
+        font-size: 1rem;
+      }
+
+      .auth-card {
+        padding: 25px 15px;
+      }
+
+      .room-id {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+      }
+
+      .game-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Notification System -->
+  <div class="notification" id="notification">
+    <i class="fas fa-info-circle"></i>
+    <span id="notification-message">Notification message</span>
+  </div>
+
+  <!-- Overlay for mobile menu -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar Menu -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h3>Menu</h3>
+      <button class="close-menu" id="closeMenu">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="user-profile">
+      <div class="user-avatar" id="sidebarAvatar"></div>
+      <div class="user-info">
+        <h3 id="sidebarUsername">Username</h3>
+        <p id="sidebarEmail">user@example.com</p>
+      </div>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li><a href="#" id="menuHome"><i class="fas fa-home"></i> Home</a></li>
+      <li><a href="#" id="menuProfile"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+      <li><a href="#" id="menuSearch"><i class="fas fa-search"></i> Search Users</a></li>
+      <li><a href="#" id="menuLogout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Auth Screens -->
+  <div id="authScreens">
+    <!-- Login Page -->
+    <div class="auth-container" id="loginPage">
+      <div class="auth-card fade-in">
+        <div class="auth-header">
+          <h1>Welcome Back</h1>
+          <p>Login to start playing WordGuess</p>
+        </div>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" class="form-control" placeholder="Enter your email">
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password">
+          </div>
+          <button type="button" class="btn btn-block" id="loginBtn">Login</button>
+        </form>
+        <div class="text-center mt-3">
+          <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Register Page -->
+    <div class="auth-container" id="registerPage" style="display: none;">
+      <div class="auth-card fade-in">
+        <div class="auth-header">
+          <h1>Create Account</h1>
+          <p>Join the WordGuess community</p>
+        </div>
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="registerEmail">Email</label>
+            <input type="email" id="registerEmail" class="form-control" placeholder="Enter your email">
+          </div>
+          <div class="form-group">
+            <label for="registerPassword">Password</label>
+            <input type="password" id="registerPassword" class="form-control" placeholder="Create a password">
+          </div>
+          <div class="form-group">
+            <label for="registerPasswordConfirm">Confirm Password</label>
+            <input type="password" id="registerPasswordConfirm" class="form-control" placeholder="Confirm your password">
+          </div>
+          <button type="button" class="btn btn-block" id="registerBtn">Register</button>
+        </form>
+        <div class="text-center mt-3">
+          <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Username Setup Page -->
+    <div class="auth-container" id="usernamePage" style="display: none;">
+      <div class="auth-card fade-in">
+        <div class="auth-header">
+          <h1>Complete Profile</h1>
+          <p>Choose your username and bio</p>
+        </div>
+        <form id="usernameForm">
+          <div class="form-group">
+            <label for="usernameInput">Username</label>
+            <input type="text" id="usernameInput" class="form-control" placeholder="Pick a username">
+          </div>
+          <div class="form-group">
+            <label for="bioInput">Bio (Optional)</label>
+            <textarea id="bioInput" class="form-control" placeholder="Tell us about yourself" rows="3"></textarea>
+          </div>
+          <button type="button" class="btn btn-block" id="setUsernameBtn">Continue</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="appContainer" style="display: none;">
+    <div class="container">
+      <!-- Navigation -->
+      <nav class="navbar">
+        <a href="#" class="logo">
+          <i class="fas fa-gamepad"></i> WordGuess
+        </a>
+        <button class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+      </nav>
+
+      <!-- Home Page -->
+      <div id="homePage">
+        <div class="home-container">
+          <div class="home-header">
+            <h1>WordGuess</h1>
+            <p>Challenge your friends in this exciting multiplayer word guessing game. Create or join a room to start playing!</p>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-accent" id="createRoomBtn">Create Room</button>
+            <button class="btn btn-outline" id="joinRoomBtn">Join Room</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Room Page -->
+      <div id="createRoomPage" style="display: none;">
+        <div class="room-container">
+          <div class="room-card fade-in">
+            <h2>Create New Room</h2>
+            <p>Enter a secret word for players to guess:</p>
+            <div class="form-group">
+              <input type="text" id="secretWordInput" class="form-control" placeholder="Secret word">
+            </div>
+            <button class="btn btn-block" id="confirmCreateBtn">Create Room</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Room Created Page -->
+      <div id="roomCreatedPage" style="display: none;">
+        <div class="room-container">
+          <div class="room-card fade-in">
+            <h2>Room Created!</h2>
+            <p>Share this room ID with your friends:</p>
+            <div class="room-id">
+              <span id="roomIdDisplay">ABCD-1234</span>
+              <button class="copy-btn" id="copyRoomIdBtn">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+            <button class="btn btn-block" id="startGameBtn">Start Game</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Join Room Page -->
+      <div id="joinRoomPage" style="display: none;">
+        <div class="room-container">
+          <div class="room-card fade-in">
+            <h2>Join Room</h2>
+            <p>Enter the room ID to join:</p>
+            <div class="form-group">
+              <input type="text" id="joinRoomIdInput" class="form-control" placeholder="Room ID">
+            </div>
+            <button class="btn btn-block" id="confirmJoinBtn">Join Room</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Page -->
+      <div id="gamePage" style="display: none;">
+        <div class="game-container">
+          <div class="game-header">
+            <div class="game-id" id="gameRoomId">Room: ABCD-1234</div>
+          </div>
+          
+          <div class="game-status" id="gameStatus">
+            <i class="fas fa-spinner fa-pulse"></i> Game in progress
+          </div>
+          
+          <div id="guessFormContainer">
+            <div class="guess-form">
+              <div class="form-group">
+                <input type="text" id="guessInput" class="form-control" placeholder="Enter your guess">
+              </div>
+              <button class="btn btn-block" id="submitGuessBtn">Submit Guess</button>
+            </div>
+          </div>
+          
+          <div class="guesses-container" id="guessesContainer">
+            <div class="guess-item">
+              <div>No guesses yet</div>
+            </div>
+          </div>
+          
+          <button class="btn btn-block btn-danger" id="leaveRoomBtn">Leave Room</button>
+        </div>
+      </div>
+
+      <!-- Edit Profile Page -->
+      <div id="editProfilePage" style="display: none;">
+        <div class="room-container">
+          <div class="room-card fade-in">
+            <h2>Edit Profile</h2>
+            <form id="profileForm">
+              <div class="form-group">
+                <label for="editUsername">Username</label>
+                <input type="text" id="editUsername" class="form-control" placeholder="Username">
+              </div>
+              <div class="form-group">
+                <label for="editBio">Bio</label>
+                <textarea id="editBio" class="form-control" placeholder="Tell us about yourself" rows="3"></textarea>
+              </div>
+              <button type="button" class="btn btn-block" id="saveProfileBtn">Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Users Page -->
+      <div id="searchUsersPage" style="display: none;">
+        <div class="room-container">
+          <div class="room-card fade-in">
+            <h2>Search Users</h2>
+            <div class="search-form">
+              <div class="form-group">
+                <input type="text" id="searchUserInput" class="form-control" placeholder="Search by username">
+              </div>
+              <button class="btn btn-block" id="searchUserBtn">Search</button>
+            </div>
+            <div class="search-results" id="searchResults">
+              <div class="search-result">
+                <div>Enter a username to search</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAd6ylYt9cdzl_79BukzLhvjgRo6DMYfEM",
+      authDomain: "online-game-f6d91.firebaseapp.com",
+      projectId: "online-game-f6d91",
+      storageBucket: "online-game-f6d91.appspot.com",
+      messagingSenderId: "625218585965",
+      appId: "1:625218585965:web:cf7d0d8f48a35423818664"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // Game state variables
+    let currentUser = null;
+    let gameId = '';
+    let isCreator = false;
+    let gameDocRef = null;
+    let players = [];
+    let secretWord = '';
+
+    // DOM Elements
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notification-message');
+    const overlay = document.getElementById('overlay');
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const closeMenu = document.getElementById('closeMenu');
+
+    // Show notification
+    function showNotification(message, type = 'info') {
+      notificationMessage.textContent = message;
+      notification.className = 'notification show';
+      notification.classList.add(type);
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    // Toggle mobile menu
+    function toggleMobileMenu() {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    // Show page with animation
+    function showPage(pageId) {
+      document.querySelectorAll('#appContainer > div > div').forEach(page => {
+        page.style.display = 'none';
+      });
+      document.getElementById(pageId).style.display = 'block';
+      document.getElementById(pageId).classList.add('fade-in');
+    }
+
+    // Initialize the app
+    function init() {
+      // Setup event listeners
+      setupAuthListeners();
+      setupMenuListeners();
+      setupGameListeners();
+      
+      // Check initial auth state
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          // User is signed in
+          db.collection('users').where('uid', '==', user.uid).get()
+            .then(querySnapshot => {
+              if (!querySnapshot.empty) {
+                const doc = querySnapshot.docs[0];
+                currentUser = {
+                  username: doc.id,
+                  uid: user.uid,
+                  email: user.email,
+                  bio: doc.data().bio || ''
+                };
+                
+                // Update UI
+                updateUserUI();
+                
+                // Show main app
+                document.getElementById('authScreens').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                showPage('homePage');
+              } else {
+                // User is authenticated but hasn't set a username
+                document.getElementById('authScreens').style.display = 'block';
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('registerPage').style.display = 'none';
+                document.getElementById('usernamePage').style.display = 'flex';
+                document.getElementById('appContainer').style.display = 'none';
+              }
+            });
+        } else {
+          // User is signed out
+          document.getElementById('authScreens').style.display = 'block';
+          document.getElementById('loginPage').style.display = 'flex';
+          document.getElementById('registerPage').style.display = 'none';
+          document.getElementById('usernamePage').style.display = 'none';
+          document.getElementById('appContainer').style.display = 'none';
+        }
+      });
+    }
+
+    // Setup authentication event listeners
+    function setupAuthListeners() {
+      // Login
+      document.getElementById('loginBtn').addEventListener('click', () => {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        
+        if (!email || !password) {
+          showNotification('Please enter both email and password', 'error');
+          return;
+        }
+        
+        auth.signInWithEmailAndPassword(email, password)
+          .catch(error => {
+            showNotification('Error logging in: ' + error.message, 'error');
+          });
+      });
+      
+      // Register
+      document.getElementById('registerBtn').addEventListener('click', () => {
+        const email = document.getElementById('registerEmail').value.trim();
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('registerPasswordConfirm').value;
+        
+        if (!email || !password || !confirmPassword) {
+          showNotification('Please fill in all fields', 'error');
+          return;
+        }
+        
+        if (password !== confirmPassword) {
+          showNotification('Passwords do not match', 'error');
+          return;
+        }
+        
+        if (password.length < 6) {
+          showNotification('Password should be at least 6 characters', 'error');
+          return;
+        }
+        
+        auth.createUserWithEmailAndPassword(email, password)
+          .then(() => {
+            document.getElementById('registerPage').style.display = 'none';
+            document.getElementById('usernamePage').style.display = 'flex';
+            showNotification('Account created! Please complete your profile', 'success');
+          })
+          .catch(error => {
+            showNotification('Error registering: ' + error.message, 'error');
+          });
+      });
+      
+      // Set username
+      document.getElementById('setUsernameBtn').addEventListener('click', () => {
+        const username = document.getElementById('usernameInput').value.trim();
+        const bio = document.getElementById('bioInput').value.trim();
+        
+        if (!username) {
+          showNotification('Please enter a username', 'error');
+          return;
+        }
+        
+        if (!auth.currentUser) {
+          showNotification('Not authenticated', 'error');
+          return;
+        }
+
+        // Validate username format
+        if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+          showNotification('Username must be 3-20 characters (letters, numbers, underscores)', 'error');
+          return;
+        }
+
+        // Check if username is available
+        db.collection('users').doc(username).get()
+          .then(doc => {
+            if (doc.exists) {
+              throw new Error('Username already taken');
+            }
+            
+            // Create user document
+            return db.collection('users').doc(username).set({
+              uid: auth.currentUser.uid,
+              email: auth.currentUser.email,
+              username: username,
+              bio: bio,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          })
+          .then(() => {
+            currentUser = {
+              username: username,
+              uid: auth.currentUser.uid,
+              email: auth.currentUser.email,
+              bio: bio
+            };
+            
+            updateUserUI();
+            showNotification('Profile setup complete!', 'success');
+            
+            // Show main app
+            document.getElementById('authScreens').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            showPage('homePage');
+          })
+          .catch(error => {
+            showNotification('Error setting username: ' + error.message, 'error');
+          });
+      });
+      
+      // Toggle between login/register
+      document.getElementById('showRegister').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('registerPage').style.display = 'flex';
+      });
+      
+      document.getElementById('showLogin').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('registerPage').style.display = 'none';
+        document.getElementById('loginPage').style.display = 'flex';
+      });
+    }
+
+    // Setup menu event listeners
+    function setupMenuListeners() {
+      // Mobile menu toggle
+      menuToggle.addEventListener('click', toggleMobileMenu);
+      closeMenu.addEventListener('click', toggleMobileMenu);
+      overlay.addEventListener('click', toggleMobileMenu);
+      
+      // Menu navigation
+      document.getElementById('menuHome').addEventListener('click', (e) => {
+        e.preventDefault();
+        showPage('homePage');
+        toggleMobileMenu();
+      });
+      
+      document.getElementById('menuProfile').addEventListener('click', (e) => {
+        e.preventDefault();
+        showEditProfilePage();
+        toggleMobileMenu();
+      });
+      
+      document.getElementById('menuSearch').addEventListener('click', (e) => {
+        e.preventDefault();
+        showPage('searchUsersPage');
+        toggleMobileMenu();
+      });
+      
+      document.getElementById('menuLogout').addEventListener('click', (e) => {
+        e.preventDefault();
+        logoutUser();
+        toggleMobileMenu();
+      });
+      
+      // Search users
+      document.getElementById('searchUserBtn').addEventListener('click', searchUsers);
+    }
+
+    // Setup game event listeners
+    function setupGameListeners() {
+      // Create room
+      document.getElementById('createRoomBtn').addEventListener('click', () => {
+        showPage('createRoomPage');
+      });
+      
+      // Confirm create room
+      document.getElementById('confirmCreateBtn').addEventListener('click', () => {
+        secretWord = document.getElementById('secretWordInput').value.trim();
+        
+        if (!secretWord) {
+          showNotification('Please enter a secret word', 'error');
+          return;
+        }
+        
+        // Generate random room ID
+        gameId = generateRoomId();
+        
+        // Show room created page
+        document.getElementById('roomIdDisplay').textContent = gameId;
+        showPage('roomCreatedPage');
+      });
+      
+      // Copy room ID
+      document.getElementById('copyRoomIdBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(gameId);
+        showNotification('Room ID copied to clipboard', 'success');
+      });
+      
+      // Start game
+      document.getElementById('startGameBtn').addEventListener('click', () => {
+        startGame();
+      });
+      
+      // Join room
+      document.getElementById('joinRoomBtn').addEventListener('click', () => {
+        showPage('joinRoomPage');
+      });
+      
+      // Confirm join room
+      document.getElementById('confirmJoinBtn').addEventListener('click', () => {
+        gameId = document.getElementById('joinRoomIdInput').value.trim();
+        
+        if (!gameId) {
+          showNotification('Please enter a room ID', 'error');
+          return;
+        }
+        
+        joinGame();
+      });
+      
+      // Submit guess
+      document.getElementById('submitGuessBtn').addEventListener('click', submitGuess);
+      
+      // Leave room
+      document.getElementById('leaveRoomBtn').addEventListener('click', leaveRoom);
+      
+      // Save profile
+      document.getElementById('saveProfileBtn').addEventListener('click', saveProfile);
+    }
+
+    // Update UI with current user info
+    function updateUserUI() {
+      if (!currentUser) return;
+      
+      // Update sidebar
+      document.getElementById('sidebarUsername').textContent = currentUser.username;
+      document.getElementById('sidebarEmail').textContent = currentUser.email;
+      document.getElementById('sidebarAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+      
+      // Update edit profile form
+      document.getElementById('editUsername').value = currentUser.username;
+      document.getElementById('editBio').value = currentUser.bio || '';
+    }
+
+    // Show edit profile page
+    function showEditProfilePage() {
+      updateUserUI();
+      showPage('editProfilePage');
+    }
+
+    // Save profile changes
+    function saveProfile() {
+      const newUsername = document.getElementById('editUsername').value.trim();
+      const newBio = document.getElementById('editBio').value.trim();
+      
+      if (!newUsername) {
+        showNotification('Please enter a username', 'error');
+        return;
+      }
+      
+      if (newUsername === currentUser.username && newBio === currentUser.bio) {
+        showNotification('No changes to save', 'info');
+        return;
+      }
+      
+      // Check if username is changed and available
+      if (newUsername !== currentUser.username) {
+        db.collection('users').doc(newUsername).get()
+          .then(doc => {
+            if (doc.exists) {
+              throw new Error('Username already taken');
+            }
+            
+            // Update user document
+            return db.collection('users').doc(newUsername).set({
+              uid: currentUser.uid,
+              email: currentUser.email,
+              username: newUsername,
+              bio: newBio,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          })
+          .then(() => {
+            // Delete old user document
+            return db.collection('users').doc(currentUser.username).delete();
+          })
+          .then(() => {
+            currentUser.username = newUsername;
+            currentUser.bio = newBio;
+            updateUserUI();
+            showNotification('Profile updated successfully', 'success');
+            showPage('homePage');
+          })
+          .catch(error => {
+            showNotification('Error updating profile: ' + error.message, 'error');
+          });
+      } else {
+        // Only update bio
+        db.collection('users').doc(currentUser.username).update({
+          bio: newBio
+        })
+        .then(() => {
+          currentUser.bio = newBio;
+          showNotification('Profile updated successfully', 'success');
+          showPage('homePage');
+        })
+        .catch(error => {
+          showNotification('Error updating profile: ' + error.message, 'error');
+        });
+      }
+    }
+
+    // Search users
+    function searchUsers() {
+      const searchTerm = document.getElementById('searchUserInput').value.trim();
+      
+      if (!searchTerm) {
+        showNotification('Please enter a username to search', 'error');
+        return;
+      }
+      
+      if (searchTerm === currentUser.username) {
+        showNotification('You cannot search for yourself', 'error');
+        return;
+      }
+      
+      db.collection('users')
+        .where('username', '>=', searchTerm)
+        .where('username', '<=', searchTerm + '\uf8ff')
+        .get()
+        .then(querySnapshot => {
+          const searchResults = document.getElementById('searchResults');
+          searchResults.innerHTML = '';
+          
+          if (querySnapshot.empty) {
+            searchResults.innerHTML = '<div class="search-result"><div>No users found</div></div>';
+            return;
+          }
+          
+          querySnapshot.forEach(doc => {
+            const userData = doc.data();
+            if (userData.username === currentUser.username) return;
+            
+            const resultItem = document.createElement('div');
+            resultItem.className = 'search-result';
+            resultItem.innerHTML = `
+              <div>
+                <strong>${userData.username}</strong>
+                ${userData.bio ? `<p class="text-muted">${userData.bio}</p>` : ''}
+              </div>
+              <button class="btn btn-sm btn-accent view-profile-btn" data-username="${userData.username}">
+                <i class="fas fa-eye"></i> View
+              </button>
+            `;
+            searchResults.appendChild(resultItem);
+          });
+        })
+        .catch(error => {
+          showNotification('Error searching users: ' + error.message, 'error');
+        });
+    }
+
+    // Generate random room ID
+    function generateRoomId() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let result = '';
+      for (let i = 0; i < 4; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      result += '-';
+      for (let i = 0; i < 4; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    // Start a new game
+    function startGame() {
+      isCreator = true;
+      gameDocRef = db.collection('games').doc(gameId);
+      players = [currentUser.username];
+      
+      // Create game document
+      gameDocRef.set({
+        secretWord: secretWord.toLowerCase(),
+        guesses: [],
+        status: 'in-progress',
+        createdBy: currentUser.username,
+        winner: '',
+        players: players,
+        ownerId: currentUser.uid
+      })
+      .then(() => {
+        showPage('gamePage');
+        document.getElementById('gameRoomId').textContent = `Room: ${gameId}`;
+        document.getElementById('guessFormContainer').style.display = 'none';
+        listenToGame();
+        showNotification('Game started! Share the room ID with friends', 'success');
+      })
+      .catch(error => {
+        showNotification('Error creating game: ' + error.message, 'error');
+      });
+    }
+
+    // Join an existing game
+    function joinGame() {
+      isCreator = false;
+      gameDocRef = db.collection('games').doc(gameId);
+      
+      gameDocRef.get()
+        .then(doc => {
+          if (!doc.exists) {
+            throw new Error('Game not found');
+          }
+          
+          const data = doc.data();
+          if (data.status !== 'in-progress') {
+            throw new Error(data.status === 'won' ? 'Game has already ended' : 'Game was ended by the host');
+          }
+          
+          players = data.players || [];
+          
+          // Add player if not already in the list
+          if (!players.includes(currentUser.username)) {
+            players.push(currentUser.username);
+            return gameDocRef.update({
+              players: firebase.firestore.FieldValue.arrayUnion(currentUser.username)
+            });
+          }
+        })
+        .then(() => {
+          showPage('gamePage');
+          document.getElementById('gameRoomId').textContent = `Room: ${gameId}`;
+          document.getElementById('guessFormContainer').style.display = 'block';
+          listenToGame();
+          showNotification('Joined game successfully!', 'success');
+        })
+        .catch(error => {
+          showNotification('Error joining game: ' + error.message, 'error');
+          showPage('homePage');
+        });
+    }
+
+    // Listen to game updates
+    function listenToGame() {
+      gameDocRef.onSnapshot(doc => {
+        const data = doc.data();
+        if (!data) return;
+        
+        const guessesContainer = document.getElementById('guessesContainer');
+        
+        if (data.status === 'won') {
+          // Game over, someone won
+          document.getElementById('gameStatus').className = 'game-status winner';
+          document.getElementById('gameStatus').innerHTML = `
+            <i class="fas fa-trophy"></i> Winner: ${data.winner}
+          `;
+          document.getElementById('guessInput').disabled = true;
+          document.getElementById('submitGuessBtn').disabled = true;
+          
+          // Redirect to home page after 5 seconds
+          setTimeout(() => {
+            leaveRoom();
+            showPage('homePage');
+          }, 5000);
+        } else if (data.status === 'ended') {
+          // Game ended by host
+          document.getElementById('gameStatus').innerHTML = `
+            <i class="fas fa-flag"></i> Game ended by host
+          `;
+          document.getElementById('guessInput').disabled = true;
+          document.getElementById('submitGuessBtn').disabled = true;
+        } else {
+          // Game in progress
+          document.getElementById('gameStatus').innerHTML = `
+            <i class="fas fa-spinner fa-pulse"></i> Game in progress
+          `;
+        }
+        
+        // Update guesses list
+        guessesContainer.innerHTML = '';
+        
+        if (data.guesses && data.guesses.length > 0) {
+          data.guesses.forEach(guess => {
+            const guessItem = document.createElement('div');
+            guessItem.className = `guess-item ${guess.result}`;
+            guessItem.innerHTML = `
+              <div>
+                <span class="guess-user">${guess.by}</span>
+                <span class="guess-value">${guess.guess}</span>
+              </div>
+              <div class="guess-result">
+                ${guess.result === 'correct' ? '✅ Correct' : '❌ Incorrect'}
+              </div>
+            `;
+            guessesContainer.appendChild(guessItem);
+          });
+        } else {
+          guessesContainer.innerHTML = '<div class="guess-item"><div>No guesses yet</div></div>';
+        }
+      }, error => {
+        console.error('Error listening to game updates:', error);
+      });
+    }
+
+    // Submit a guess
+    function submitGuess() {
+      const guess = document.getElementById('guessInput').value.trim();
+      if (!guess) {
+        showNotification('Please enter a guess', 'error');
+        return;
+      }
+      
+      if (isCreator) return;
+
+      gameDocRef.get()
+        .then(doc => {
+          if (!doc.exists) {
+            throw new Error('Game no longer exists');
+          }
+
+          const data = doc.data();
+          if (data.status !== 'in-progress') {
+            throw new Error('Game is not in progress');
+          }
+
+          const isCorrect = (guess.toLowerCase() === data.secretWord);
+          const newGuess = {
+            guess: guess,
+            by: currentUser.username,
+            result: isCorrect ? 'correct' : 'incorrect',
+            timestamp: new Date().toISOString()
+          };
+
+          const currentGuesses = data.guesses || [];
+          currentGuesses.push(newGuess);
+          
+          const updates = {
+            guesses: currentGuesses
+          };
+
+          if (isCorrect) {
+            updates.status = 'won';
+            updates.winner = currentUser.username;
+          }
+
+          return gameDocRef.update(updates);
+        })
+        .then(() => {
+          document.getElementById('guessInput').value = '';
+        })
+        .catch(error => {
+          showNotification('Error submitting guess: ' + error.message, 'error');
+        });
+    }
+
+    // Leave the current room
+    function leaveRoom() {
+      if (gameDocRef && players.includes(currentUser.username)) {
+        gameDocRef.update({
+          players: firebase.firestore.FieldValue.arrayRemove(currentUser.username)
+        }).catch(error => {
+          console.error('Error removing player:', error);
+        });
+      }
+      
+      gameId = '';
+      isCreator = false;
+      gameDocRef = null;
+      players = [];
+      secretWord = '';
+    }
+
+    // Logout user
+    function logoutUser() {
+      auth.signOut()
+        .then(() => {
+          currentUser = null;
+          leaveRoom();
+          showNotification('Logged out successfully', 'success');
+        })
+        .catch(error => {
+          showNotification('Error logging out: ' + error.message, 'error');
+        });
+    }
+
+    // Start the app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
