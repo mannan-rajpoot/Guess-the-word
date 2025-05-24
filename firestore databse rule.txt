@@ -1,0 +1,50 @@
+                                                                    (Rule of firestore database)
+
+
+
+
+
+
+
+
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{username} {
+      // Allow read access to all users
+      allow read: if true;
+      
+      // Allow create if:
+      // 1. User is authenticated
+      // 2. The document ID matches the username field
+      // 3. The uid field matches the requesting user's UID
+      allow create: if request.auth != null 
+                   && username == request.resource.data.username
+                   && request.resource.data.uid == request.auth.uid;
+      
+      // Allow update only by the document owner
+      allow update: if request.auth != null 
+                   && request.auth.uid == resource.data.uid;
+      
+      // Allow delete only by the document owner
+      allow delete: if request.auth != null 
+                   && request.auth.uid == resource.data.uid;
+    }
+    
+    match /games/{gameId} {
+      // Allow read if user is in the players list or is the creator
+      allow read: if request.auth != null 
+                 && (resource.data.players != null 
+                     && resource.data.players.hasAny([request.auth.token.email, request.auth.token.name])
+                     || resource.data.ownerId == request.auth.uid);
+      
+      // Allow create for authenticated users
+      allow create: if request.auth != null;
+      
+      // Allow update only by the game creator
+      allow update: if request.auth != null 
+                  && request.auth.uid == resource.data.ownerId;
+    }
+  }
+}
